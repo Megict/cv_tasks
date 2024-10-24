@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import math
 
 
 def rotate(image, point: tuple, angle: float) -> np.ndarray:
@@ -11,10 +12,44 @@ def rotate(image, point: tuple, angle: float) -> np.ndarray:
     :param angle: угол поворота
     :return: повернутное изображение
     """
-    # Ваш код
-    pass
+    angle = -angle
 
-    return image
+    def coord_shift(x, y):
+        return x*math.cos(math.radians(angle)) - y*math.sin(math.radians(angle)), x*math.sin(math.radians(angle)) + y*math.cos(math.radians(angle))
+    
+    x_min = image.shape[1]
+    x_max = 0
+    y_min = image.shape[2]
+    y_max = 0
+    for y_pos in range(image.shape[0]):
+        for x_pos in range(image.shape[1]):
+            new_x, new_y = coord_shift(x_pos, y_pos)
+
+            if new_x < x_min:
+                x_min = int(new_x)
+            if new_x > x_max:
+                x_max = int(new_x)
+
+            if new_y < y_min:
+                y_min = int(new_y)
+            if new_y > y_max:
+                y_max = int(new_y)
+
+    print(x_min,x_max)
+    print(y_min,y_max)
+    
+    new_image = np.zeros((y_max - y_min, x_max - x_min, 3), dtype = int)
+
+    for y_pos in range(image.shape[0]):
+        for x_pos in range(image.shape[1]):
+            new_x, new_y = coord_shift(x_pos, y_pos)
+            try:
+                new_image[round(new_y - y_min), round(new_x - x_min)] = np.array(image[y_pos, x_pos],dtype = int)
+            except IndexError:
+                pass
+
+
+    return new_image
 
 
 def apply_warpAffine(image, points1, points2) -> np.ndarray:
@@ -28,6 +63,50 @@ def apply_warpAffine(image, points1, points2) -> np.ndarray:
     :return: преобразованное изображение
     """
     # Ваш код
-    pass
+    # prm = [
+    #     [points2[0][0] / points1[0][0], points2[1][0] / points1[1][0], points2[2][0] / points1[2][0]],
+    #     [points2[0][1] / points1[0][1], points2[1][1] / points1[1][1], points2[2][1] / points1[2][1]],
+    #     [0,0,1]
+    # ]
+    prm = [
+        [points1[0][0] / points2[0][0], points1[1][0] / points2[1][0], points1[2][0] / points2[2][0]],
+        [points1[0][1] / points2[0][1], points1[1][1] / points2[1][1], points1[2][1] / points2[2][1]],
+        [0,0,1]
+    ]
 
-    return image
+    def coord_shift(x, y):
+        return x*prm[0][0] + y*prm[0][1] + prm[0][2], x*prm[1][0] + y*prm[1][1] + prm[1][2]
+
+    x_min = image.shape[1]
+    x_max = 0
+    y_min = image.shape[2]
+    y_max = 0
+    for y_pos in range(image.shape[0]):
+        for x_pos in range(image.shape[1]):
+            new_x, new_y = coord_shift(x_pos, y_pos)
+
+            if new_x < x_min:
+                x_min = int(new_x)
+            if new_x > x_max:
+                x_max = int(new_x)
+
+            if new_y < y_min:
+                y_min = int(new_y)
+            if new_y > y_max:
+                y_max = int(new_y)
+
+    print(x_min,x_max)
+    print(y_min,y_max)
+    
+    new_image = np.zeros((y_max - y_min, x_max - x_min, 3), dtype = int)
+
+    for y_pos in range(image.shape[0]):
+        for x_pos in range(image.shape[1]):
+            new_x, new_y = coord_shift(x_pos, y_pos)
+            try:
+                new_image[round(new_y - y_min), round(new_x - x_min)] = np.array(image[y_pos, x_pos],dtype = int)
+            except IndexError:
+                pass
+
+
+    return new_image
