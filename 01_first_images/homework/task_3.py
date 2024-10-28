@@ -51,6 +51,7 @@ def rotate(image, point: tuple, angle: float) -> np.ndarray:
 
     return new_image
 
+from sympy import Matrix, pprint
 
 def apply_warpAffine(image, points1, points2) -> np.ndarray:
     """
@@ -68,11 +69,38 @@ def apply_warpAffine(image, points1, points2) -> np.ndarray:
     #     [points2[0][1] / points1[0][1], points2[1][1] / points1[1][1], points2[2][1] / points1[2][1]],
     #     [0,0,1]
     # ]
+    # b = (points1[0][0] * points2[1][0] - points2[0][0] * points1[1][0]) / (points1[0][0] * points1[1][1] - points1[1][0] * points1[0][1])
+    # a = (points2[0][0] - b * points1[0][1]) / points1[0][0]
+    
+    # c = (points1[0][0] * points2[1][1] - points2[0][1] * points1[1][0]) / (points1[0][0] * points1[1][1] - points1[1][0] * points1[0][1])
+    # d = (points2[0][1] - b * points1[0][1]) / points1[0][0]
+
+    augmented_matrix = Matrix([
+        [points1[0][0], points1[0][1], 1, 0, 0, 0, points2[0][0]],
+        [points1[1][0], points1[1][1], 1, 0, 0, 0, points2[1][0]],
+        [points1[2][0], points1[2][1], 1, 0, 0, 0, points2[2][0]],
+        [0, 0, 0, points1[0][0], points1[0][1], 1, points2[0][1]],
+        [0, 0, 0, points1[1][0], points1[1][1], 1, points2[1][1]],
+        [0, 0, 0, points1[2][0], points1[2][1], 1, points2[2][1]],
+    ])
+
+    row_reduced_matrix, _ = augmented_matrix.rref()
+    pprint(row_reduced_matrix)
+
+    a = float(row_reduced_matrix.row(0)[-1])
+    b = float(row_reduced_matrix.row(1)[-1])
+    c = float(row_reduced_matrix.row(2)[-1])
+    d = float(row_reduced_matrix.row(3)[-1])
+    e = float(row_reduced_matrix.row(4)[-1])
+    f = float(row_reduced_matrix.row(5)[-1])
+
     prm = [
-        [points1[0][0] / points2[0][0], points1[1][0] / points2[1][0], points1[2][0] / points2[2][0]],
-        [points1[0][1] / points2[0][1], points1[1][1] / points2[1][1], points1[2][1] / points2[2][1]],
+        [a,b,c],
+        [d,e,f],
         [0,0,1]
     ]
+
+    print(prm)
 
     def coord_shift(x, y):
         return x*prm[0][0] + y*prm[0][1] + prm[0][2], x*prm[1][0] + y*prm[1][1] + prm[1][2]
