@@ -18,9 +18,21 @@ def conv_nested(image, kernel):
     Hi, Wi = image.shape
     Hk, Wk = kernel.shape
     out = np.zeros((Hi, Wi))
+    # print(image.shape)
 
     ### YOUR CODE HERE
-    pass
+    for cur_pix_x in range(0, Wi):
+        for cur_pix_y in range(0, Hi):
+            res_pix = 0
+            for filt_pos_x in range(0, Wk):
+                for filt_pos_y in range(0, Hk): 
+                    img_pos_x = cur_pix_x + (int(0.5*Wk) - filt_pos_x)
+                    img_pos_y = cur_pix_y + (int(0.5*Wk) - filt_pos_y)
+
+                    img_pix_value = image[img_pos_y, img_pos_x] if img_pos_x >=0 and img_pos_y >= 0 and img_pos_x < Wi and img_pos_y < Hi else 0
+
+                    res_pix += img_pix_value*kernel[filt_pos_y, filt_pos_x]
+            out[cur_pix_y, cur_pix_x] = res_pix
     ### END YOUR CODE
 
     return out
@@ -47,7 +59,8 @@ def zero_pad(image, pad_height, pad_width):
     out = np.zeros_like(image)
 
     ### YOUR CODE HERE
-    pass
+    out = np.zeros((image.shape[0] + pad_height*2, image.shape[1] + pad_width*2))
+    out[pad_height : pad_height + image.shape[0], pad_width : pad_width + image.shape[1]] = image
     ### END YOUR CODE
     return out
 
@@ -74,9 +87,13 @@ def conv_fast(image, kernel):
     Hi, Wi = image.shape
     Hk, Wk = kernel.shape
     out = np.zeros((Hi, Wi))
-
     ### YOUR CODE HERE
-    pass
+    kernel = np.flip(kernel,1)
+    pad_img = zero_pad(image, int(Hk / 2), int(Wk / 2))
+    for i in range(Hi):
+        for j in range(Wi):
+            out[i,j] = np.mean(np.multiply(pad_img[i:i+Hk][:,j:j+Wk], kernel))
+
     ### END YOUR CODE
 
     return out
@@ -95,10 +112,12 @@ def conv_faster(image, kernel):
     out = np.zeros((Hi, Wi))
 
     ### YOUR CODE HERE
-    pass
+    out = np.real(np.fft.ifft2(np.multiply(np.fft.fft2(image),np.fft.fft2(kernel, image.shape))))
     ### END YOUR CODE
 
     return out
+
+from tqdm import tqdm
 
 def cross_correlation(f, g):
     """ Cross-correlation of f and g.
@@ -112,10 +131,17 @@ def cross_correlation(f, g):
     Returns:
         out: numpy array of shape (Hf, Wf).
     """
-
+    Hf, Wf = f.shape
+    Hg, Wg = g.shape
+    
     out = np.zeros_like(f)
     ### YOUR CODE HERE
-    pass
+    for m in tqdm(range(Hf)):
+        for n in range(Wf):
+            for i in range(m - Hg + 1, m + 1):
+                for j in range(n - Wg + 1, n + 1):
+                    out[m,n] += f[i,j] * g[m -i, n - j]
+
     ### END YOUR CODE
 
     return out
