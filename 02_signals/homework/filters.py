@@ -136,11 +136,12 @@ def cross_correlation(f, g):
     
     out = np.zeros_like(f)
     ### YOUR CODE HERE
-    for m in tqdm(range(Hf)):
-        for n in range(Wf):
-            for i in range(m - Hg + 1, m + 1):
-                for j in range(n - Wg + 1, n + 1):
-                    out[m,n] += f[i,j] * g[m -i, n - j]
+    for m in tqdm(range(Hf - Hg)):
+        for n in range(Wf - Wg):
+            out[m,n] = np.sum(conv_faster(f[m : m + Hg, n : n + Wg], g))
+            # for i in range(Hg):
+            #     for j in range(Wg):
+            #         out[m,n] += f[m + i,n + j] * g[i, j]
 
     ### END YOUR CODE
 
