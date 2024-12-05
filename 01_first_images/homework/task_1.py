@@ -76,7 +76,7 @@ def find_way_from_maze(image: np.ndarray) -> tuple:
 
         coords[0].append(x_pos)
         coords[1].append(y_pos)
-        print(x_pos, y_pos, path_direction)
+        # print(x_pos, y_pos, path_direction)
         
 
     return coords[1], coords[0]
