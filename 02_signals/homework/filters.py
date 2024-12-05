@@ -134,14 +134,20 @@ def cross_correlation(f, g):
     Hf, Wf = f.shape
     Hg, Wg = g.shape
     
-    out = np.zeros_like(f)
-    ### YOUR CODE HERE
+    out = np.zeros_like(f, dtype = float)
+    # ### YOUR CODE HERE
+    g_mean = np.mean(g)
+    # g = g - g_mean
     for m in tqdm(range(Hf - Hg)):
         for n in range(Wf - Wg):
-            out[m,n] = np.sum(conv_faster(f[m : m + Hg, n : n + Wg], g))
-            # for i in range(Hg):
-            #     for j in range(Wg):
-            #         out[m,n] += f[m + i,n + j] * g[i, j]
+            
+            matr_frag = f[m : m + Hg, n : n + Wg]
+            matr_mean = np.mean(matr_frag)
+            matr_frag = matr_frag - matr_mean
+
+            elm_matr = np.multiply(g, matr_frag)
+            
+            out[m,n] = np.sum(elm_matr) 
 
     ### END YOUR CODE
 
@@ -162,9 +168,25 @@ def zero_mean_cross_correlation(f, g):
         out: numpy array of shape (Hf, Wf).
     """
 
-    out = np.zeros_like(f)
-    ### YOUR CODE HERE
-    pass
+    Hf, Wf = f.shape
+    Hg, Wg = g.shape
+    
+    out = np.zeros_like(f, dtype = float)
+    # ### YOUR CODE HERE
+    g_mean = np.mean(g)
+    g = g - g_mean
+    print(f"template mean value (after correction) : {np.mean(g)}")
+    for m in tqdm(range(Hf - Hg)):
+        for n in range(Wf - Wg):
+            
+            matr_frag = f[m : m + Hg, n : n + Wg]
+            matr_mean = np.mean(matr_frag)
+            matr_frag = matr_frag - matr_mean
+
+            elm_matr = np.multiply(g, matr_frag)
+            
+            out[m,n] = np.sum(elm_matr)
+
     ### END YOUR CODE
 
     return out
@@ -186,9 +208,27 @@ def normalized_cross_correlation(f, g):
         out: numpy array of shape (Hf, Wf).
     """
 
-    out = np.zeros_like(f)
-    ### YOUR CODE HERE
-    pass
+    Hf, Wf = f.shape
+    Hg, Wg = g.shape
+    
+    out = np.zeros_like(f, dtype = float)
+    # ### YOUR CODE HERE
+    g_mean = np.mean(g)
+    g_std = np.std(g)
+    g = g - g_mean
+    print(f"template mean value (after correction) : {np.mean(g)}")
+    for m in tqdm(range(Hf - Hg)):
+        for n in range(Wf - Wg):
+            
+            matr_frag = f[m : m + Hg, n : n + Wg]
+            matr_mean = np.mean(matr_frag)
+            matr_std = np.std(matr_frag)
+            matr_frag = matr_frag - matr_mean
+
+            elm_matr = np.multiply(g, matr_frag)
+            
+            out[m,n] = np.sum(elm_matr) / (matr_std * g_std)
+
     ### END YOUR CODE
 
     return out
