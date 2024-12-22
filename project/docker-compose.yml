@@ -1,0 +1,6 @@
+version: "1.0"
+services:
+  data:
+    build: ./front_service
+    ports:
+      - "8000:8000"
