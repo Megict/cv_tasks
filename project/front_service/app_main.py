@@ -8,6 +8,7 @@ import torch
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = Dash(__name__, external_stylesheets=external_stylesheets)
+server = app.server
 
 device = 'cpu'
 if torch.cuda.is_available():
@@ -115,7 +116,7 @@ def process_image(image, labels_to_highlight):
         draw.rectangle((x1, y1, x2, y2), outline="red", width=10)
         # добавление текста
         text = model.config.id2label[label] + "  (" + str(score) + ")"
-        font = ImageFont.truetype("arial.ttf", int(image_good.size[0] / 50))
+        font = ImageFont.truetype("Arial.ttf", int(image_good.size[0] / 50))
         bbox = draw.textbbox((x1, y1), text, font=font)
         draw.rectangle(bbox, fill="red")
         draw.text((x1, y1), text, fill="white", font=font)
@@ -138,4 +139,4 @@ def update_output(list_of_contents, labels_to_highlight):
         return html.Div(html.Img(src = blank), style = {'width': '100%', 'textAlign': 'center'}), all_labels
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=8000)

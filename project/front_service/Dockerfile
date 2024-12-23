@@ -5,9 +5,8 @@ WORKDIR /code
 COPY ./requirements.txt /code/requirements.txt
 
 RUN pip install --no-cache-dir --upgrade -r ./requirements.txt
-RUN pip install fastapi uvicorn
-RUN pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
 
 COPY ./app_main.py /code/app_main.py
+COPY ./Arial.ttf /code/Arial.ttf
 
-CMD ["uvicorn", "app_main.py:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+CMD gunicorn --bind 0.0.0.0:8001 app_main:server
